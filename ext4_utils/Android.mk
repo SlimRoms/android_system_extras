@@ -71,6 +71,11 @@ LOCAL_SHARED_LIBRARIES := \
     libsparse \
     libz
 LOCAL_CFLAGS := -DREAL_UUID
+
+ifeq ($(BOARD_SUPPRESS_EMMC_WIPE),true)
+    LOCAL_CFLAGS += -DSUPPRESS_EMMC_WIPE
+endif
+
 include $(BUILD_SHARED_LIBRARY)
 
 
@@ -80,6 +85,11 @@ LOCAL_SRC_FILES := $(libext4_utils_src_files) \
 LOCAL_MODULE := libext4_utils_static
 LOCAL_STATIC_LIBRARIES := \
     libsparse_static
+
+ifeq ($(BOARD_SUPPRESS_EMMC_WIPE),true)
+    LOCAL_CFLAGS += -DSUPPRESS_EMMC_WIPE
+endif
+
 include $(BUILD_STATIC_LIBRARY)
 
 
