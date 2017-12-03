@@ -49,7 +49,7 @@ class AppProfiler(object):
                         'record_options', 'perf_data_path', 'adb_path', 'readelf_path',
                         'binary_cache_dir']
         for name in config_names:
-            if not config.has_key(name):
+            if name not in config:
                 log_fatal('config [%s] is missing' % name)
         native_lib_dir = config.get('native_lib_dir')
         if native_lib_dir and not os.path.isdir(native_lib_dir):
@@ -121,7 +121,7 @@ class AppProfiler(object):
         self.adb.set_property('security.perf_harden', '0')
         if self.is_root_device:
             # We can enable kernel symbols
-            self.adb.run(['shell', 'echo', '0', '>/proc/sys/kernel/kptr_restrict'])
+            self.adb.run(['shell', 'echo 0 >/proc/sys/kernel/kptr_restrict'])
 
 
     def _recompile_app(self):
@@ -177,7 +177,8 @@ class AppProfiler(object):
 
 
     def _find_app_process(self):
-        result, output = self.adb.run_and_return_output(['shell', 'ps'])
+        ps_args = ['-e'] if self.android_version >= 8 else []
+        result, output = self.adb.run_and_return_output(['shell', 'ps'] + ps_args)
         if not result:
             return None
         output = output.split('\n')
@@ -270,10 +271,7 @@ class AppProfiler(object):
 
 
     def collect_profiling_data(self):
-        self.run_in_app_dir(['chmod', 'a+rw', 'perf.data'])
-        self.adb.check_run(['shell', 'cp',
-            '/data/data/%s/perf.data' % self.config['app_package_name'], '/data/local/tmp'])
-        self.adb.check_run(['pull', '/data/local/tmp/perf.data', self.config['perf_data_path']])
+        self.run_in_app_dir(['cat', 'perf.data'], self.config['perf_data_path'])
         config = copy.copy(self.config)
         config['symfs_dirs'] = []
         if self.config['native_lib_dir']:
@@ -282,13 +280,13 @@ class AppProfiler(object):
         binary_cache_builder.build_binary_cache()
 
 
-    def run_in_app_dir(self, args):
+    def run_in_app_dir(self, args, stdout_file=None):
         if self.is_root_device:
             cmd = 'cd /data/data/' + self.config['app_package_name'] + ' && ' + (' '.join(args))
-            return self.adb.check_run_and_return_output(['shell', cmd])
+            return self.adb.check_run_and_return_output(['shell', cmd], stdout_file)
         else:
             return self.adb.check_run_and_return_output(
-                ['shell', 'run-as', self.config['app_package_name']] + args)
+                ['shell', 'run-as', self.config['app_package_name']] + args, stdout_file)
 
 
 if __name__ == '__main__':

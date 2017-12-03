@@ -315,6 +315,7 @@ simpleperf_unit_test_src_files_linux := \
 include $(CLEAR_VARS)
 LOCAL_CLANG := true
 LOCAL_MODULE := simpleperf_unit_test
+LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_CPPFLAGS := $(simpleperf_cppflags_target)
 LOCAL_SRC_FILES := \
   $(simpleperf_unit_test_src_files) \
@@ -354,6 +355,7 @@ simpleperf_cpu_hotplug_test_src_files := \
 include $(CLEAR_VARS)
 LOCAL_CLANG := true
 LOCAL_MODULE := simpleperf_cpu_hotplug_test
+LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_CPPFLAGS := $(simpleperf_cppflags_target)
 LOCAL_SRC_FILES := $(simpleperf_cpu_hotplug_test_src_files)
 LOCAL_STATIC_LIBRARIES := libsimpleperf $(simpleperf_static_libraries_target)
